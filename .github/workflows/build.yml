@@ -8,13 +8,10 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      BUILDOZER_DOWNLOAD_DIR: ${{ github.workspace }}/.buildozer_downloads
-      BUILDOZER_ANDROID_DIR: ${{ github.workspace }}/.buildozer_android
-
+    
     steps:
       - uses: actions/checkout@v3
-
+        
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -26,8 +23,17 @@ jobs:
           sudo apt install -y python3-pip python3-setuptools python3-wheel git zip openjdk-17-jdk
           pip install --upgrade pip
           pip install buildozer cython==0.29.36
-
+      
+      # CRITICAL STEP: Clean up all buildozer data to prevent permission errors
+      - name: Clean buildozer cache
+        run: |
+          rm -rf ~/.buildozer
+          rm -rf ./.buildozer
+          
       - name: Build APK
+        env:
+          BUILDOZER_DOWNLOAD_DIR: ${{ github.workspace }}/.buildozer_downloads
+          BUILDOZER_ANDROID_DIR: ${{ github.workspace }}/.buildozer_android
         run: buildozer android debug
 
       - name: Upload APK
