@@ -2,41 +2,40 @@ name: Build Kivy APK
 
 on:
   push:
-    branches: [ main ]
+    branches: [ master ]
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    
+
     steps:
-      - uses: actions/checkout@v3
-        
-      - name: Set up Python
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python 3.11
         uses: actions/setup-python@v4
         with:
-          python-version: "3.10"
+          python-version: "3.11"
 
-      - name: Install dependencies
+      - name: Install system dependencies
         run: |
           sudo apt update
-          sudo apt install -y python3-pip python3-setuptools python3-wheel git zip openjdk-17-jdk
-          pip install --upgrade pip
-          pip install buildozer cython==0.29.36
-      
-      # CRITICAL STEP: Clean up all buildozer data to prevent permission errors
-      - name: Clean buildozer cache
-        run: |
-          rm -rf ~/.buildozer
-          rm -rf ./.buildozer
-          
-      - name: Build APK
-        env:
-          BUILDOZER_DOWNLOAD_DIR: ${{ github.workspace }}/.buildozer_downloads
-          BUILDOZER_ANDROID_DIR: ${{ github.workspace }}/.buildozer_android
-        run: buildozer android debug
+          sudo apt install -y python3-pip python3-setuptools python3-wheel git zip openjdk-17-jdk unzip autoconf automake libtool pkg-config build-essential curl wget
 
-      - name: Upload APK
+      - name: Install Buildozer and Python-for-Android
+        run: |
+          pip install --upgrade pip
+          pip install buildozer==1.3.0 python-for-android==2024.1.21 cython==0.29.36 kivy
+
+      - name: Build APK with Buildozer
+        env:
+          HOME: /home/runner
+        run: |
+          buildozer android clean
+          buildozer android debug
+
+      - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: kivy-apk
