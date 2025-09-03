@@ -9,7 +9,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      HOME: /home/runner # Ensures buildozer uses the correct home directory
+      BUILDOZER_DOWNLOAD_DIR: ${{ github.workspace }}/.buildozer_downloads
+      BUILDOZER_ANDROID_DIR: ${{ github.workspace }}/.buildozer_android
 
     steps:
       - uses: actions/checkout@v3
@@ -25,12 +26,6 @@ jobs:
           sudo apt install -y python3-pip python3-setuptools python3-wheel git zip openjdk-17-jdk
           pip install --upgrade pip
           pip install buildozer cython==0.29.36
-
-      - name: Clean up old build data
-        run: |
-          # This command removes any potentially corrupted buildozer data,
-          # including any lingering references to old directories.
-          rm -rf ~/.buildozer
 
       - name: Build APK
         run: buildozer android debug
