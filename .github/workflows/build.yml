@@ -24,13 +24,10 @@ jobs:
           pip install --upgrade pip
           pip install buildozer cython==0.29.36
 
-      - name: Install Android SDK/NDK
-        run: |
-          sudo apt install -y unzip
-          buildozer android clean
-
       - name: Build APK
         run: |
+          # The 'buildozer android debug' command automatically handles cleaning
+          # and downloading the necessary Android SDK/NDK components.
           buildozer android debug
 
       - name: Upload APK
